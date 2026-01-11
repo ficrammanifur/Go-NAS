@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Go-NAS</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-content">
+            <h2>Go-NAS Dashboard</h2>
+            <a href="/logout" class="btn-logout">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container dashboard-container">
+        <div class="upload-section">
+            <h3>📤 Upload File</h3>
+            <form method="POST" action="/upload" enctype="multipart/form-data" class="upload-form">
+                <input 
+                    type="file" 
+                    name="file" 
+                    id="file-input"
+                    required
+                >
+                <label for="file-input" class="file-label">
+                    Pilih file atau drag & drop
+                </label>
+                <button type="submit" class="btn-primary">Upload</button>
+            </form>
+        </div>
+
+        <div class="files-section">
+            <h3>📁 Daftar File</h3>
+            {{if .Files}}
+                <div class="files-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nama File</th>
+                                <th>Ukuran</th>
+                                <th>Tanggal Modifikasi</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{range .Files}}
+                            <tr>
+                                <td>
+                                    <span class="file-icon">📄</span>
+                                    {{.Name}}
+                                </td>
+                                <td>{{.Size}}</td>
+                                <td>{{.ModTime}}</td>
+                                <td>
+                                    <a href="/download?file={{.Name}}" class="btn-small btn-download">Download</a>
+                                    <form method="POST" action="/delete" class="delete-form">
+                                        <input type="hidden" name="file" value="{{.Name}}">
+                                        <button type="submit" class="btn-small btn-delete" onclick="return confirm('Hapus file ini?')">Hapus</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {{end}}
+                        </tbody>
+                    </table>
+                </div>
+            {{else}}
+                <p class="empty-message">Tidak ada file. Upload file pertama Anda!</p>
+            {{end}}
+        </div>
+    </div>
+</body>
+</html>
