@@ -171,16 +171,34 @@ func handleDownload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Bersihkan nama file
 	filename = filepath.Base(filename)
-	filepath := filepath.Join(storageDir, filename)
 
-	if !strings.HasPrefix(filepath, storageDir) {
+	// Absolute storage path
+	storageAbs, err := filepath.Abs(storageDir)
+	if err != nil {
+		http.Error(w, "Server error", http.StatusInternalServerError)
+		return
+	}
+
+	// Absolute file path
+	filePath := filepath.Join(storageAbs, filename)
+	filePath = filepath.Clean(filePath)
+
+	// Validasi path (ANTI DIRECTORY TRAVERSAL)
+	if !strings.HasPrefix(filePath, storageAbs+string(os.PathSeparator)) {
 		http.Error(w, "Akses ditolak", http.StatusForbidden)
 		return
 	}
 
-	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
-	http.ServeFile(w, r, filepath)
+	// Pastikan file ada
+	if _, err := os.Stat(filePath); err != nil {
+		http.Error(w, "File tidak ditemukan", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
+	http.ServeFile(w, r, filePath)
 }
 
 func handleDelete(w http.ResponseWriter, r *http.Request) {
