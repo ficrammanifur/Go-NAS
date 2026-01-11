@@ -1,10 +1,17 @@
-# Go-NAS: Network Attached Storage Sederhana
+<div align="center">
+
+# Go-NAS  
+### Network Attached Storage Sederhana
 
 ![Go Version](https://img.shields.io/badge/Go-1.21+-00ADD8?style=flat-square&logo=go)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 ![Status](https://img.shields.io/badge/Status-Learning-yellow?style=flat-square)
 
-Aplikasi **Network Attached Storage (NAS)** sederhana yang dibuat dengan Go, dirancang untuk pembelajaran dan penggunaan pribadi di perangkat lokal seperti PC, Mini PC, atau Raspberry Pi.
+Aplikasi **Network Attached Storage (NAS)** sederhana yang dibuat dengan Go,  
+dirancang untuk pembelajaran dan penggunaan pribadi di perangkat lokal  
+seperti PC, Mini PC, atau Raspberry Pi.
+
+</div>
 
 ## 🎯 Fitur Utama
 
