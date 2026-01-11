@@ -44,7 +44,7 @@ seperti PC, Mini PC, atau Raspberry Pi.
 
 1. **Clone atau download project**
    ```bash
-   git clone https://github.com/yourusername/go-nas.git
+   git clone https://github.com/ficrammanifur/Go-NAS
    cd go-nas
    ```
 
