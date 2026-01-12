@@ -1,18 +1,53 @@
-# Go
+# =========================
+# Go build artifacts
+# =========================
 /bin/
 /dist/
 *.exe
 *.out
+*.test
 
-# Go toolchain
+# Go toolchain archives
 go*.tar.gz
 
-# OS
+# =========================
+# Go modules cache (optional)
+# =========================
+/pkg/
+/vendor/
+
+# =========================
+# Runtime & generated data
+# =========================
+/storage/
+*.log
+
+# =========================
+# Environment & secrets
+# =========================
+.env
+*.env
+
+# =========================
+# Node (kalau frontend build kepake)
+# =========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =========================
+# OS / Editor junk
+# =========================
 .DS_Store
 Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
 
-# Node (kalau kepake)
-node_modules/
-
-# Env
-.env
+# =========================
+# Temporary files
+# =========================
+*.tmp
+*.bak

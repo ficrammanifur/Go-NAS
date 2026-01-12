@@ -3,62 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Go-NAS</title>
+    <title>Go-NAS Dashboard</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+    <!-- Added dark mode toggle button to navbar -->
     <nav class="navbar">
         <div class="navbar-content">
-            <h2>Go-NAS Dashboard</h2>
-            <a href="/logout" class="btn-logout">Logout</a>
+            <div class="navbar-left">
+                <h2 class="logo">Go-NAS</h2>
+                <span class="tagline">Cloud Storage Hub</span>
+            </div>
+            <div class="navbar-right">
+                <div class="storage-indicator" id="storage-indicator">
+                    <span id="storage-status" class="status-dot online"></span>
+                    <span id="storage-text">Loading...</span>
+                </div>
+                <button id="dark-mode-toggle" class="btn-dark-mode" title="Toggle dark mode">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <a href="/logout" class="btn-logout">Logout</a>
+            </div>
         </div>
     </nav>
 
     <div class="container dashboard-container">
+        <div class="storage-info-card">
+            <div class="storage-header">
+                <div class="header-left">
+                    <h3>Storage Overview</h3>
+                    <span class="storage-provider">{{.StorageProvider}}</span>
+                </div>
+                <div class="header-right">
+                    <span id="quota-percent" class="quota-text">0%</span>
+                </div>
+            </div>
+            
+            <div class="storage-stats-grid">
+                <div class="stat-box">
+                    <div class="stat-label">Used</div>
+                    <div class="stat-value">{{.UsedGB}}<span class="unit">GB</span></div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Total</div>
+                    <div class="stat-value">{{.TotalGB}}<span class="unit">GB</span></div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Status</div>
+                    <div class="stat-value status-{{.StorageStatus}}">{{.StorageStatus}}</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Type</div>
+                    <div class="stat-value">{{.StorageType}}</div>
+                </div>
+            </div>
+            
+            <div class="storage-bar-container">
+                <div class="storage-bar">
+                    <!-- Added animation class to progress bar -->
+                    <div class="storage-used" id="storage-bar-fill"></div>
+                </div>
+                <span class="bar-label"><span id="quota-label">0%</span> used</span>
+            </div>
+        </div>
+
         <div class="upload-section">
-            <h3>📤 Upload File</h3>
-            <form method="POST" action="/upload" enctype="multipart/form-data" class="upload-form">
-                <input 
-                    type="file" 
-                    name="file" 
-                    id="file-input"
-                    required
-                >
-                <label for="file-input" class="file-label">
-                    Pilih file atau drag & drop
-                </label>
-                <button type="submit" class="btn-primary">Upload</button>
+            <h3>Upload File</h3>
+            <form method="POST" action="/upload" enctype="multipart/form-data" class="upload-form" id="upload-form">
+                <!-- Added folder input field -->
+                <input type="hidden" name="folder" id="folder-input" value="">
+                
+                <!-- Added drag-drop zone -->
+                <div class="file-input-wrapper" id="drag-drop-zone">
+                    <input 
+                        type="file" 
+                        name="file" 
+                        id="file-input"
+                        required
+                    >
+                    <label for="file-input" class="file-label">
+                        <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        <span>Click to upload or drag & drop</span>
+                        <small>Max 500MB per file</small>
+                    </label>
+                </div>
+                <button type="submit" class="btn-primary">Upload Encrypted</button>
             </form>
         </div>
 
         <div class="files-section">
-            <h3>📁 Daftar File</h3>
+            <div class="files-header">
+                <h3>File List</h3>
+                <!-- Added mkdir form -->
+                <form method="POST" action="/mkdir" class="mkdir-form">
+                    <input type="text" name="folder" placeholder="New folder name" required>
+                    <button type="submit" class="btn-small btn-mkdir">Create Folder</button>
+                </form>
+            </div>
             {{if .Files}}
                 <div class="files-table">
                     <table>
                         <thead>
                             <tr>
-                                <th>Nama File</th>
-                                <th>Ukuran</th>
-                                <th>Tanggal Modifikasi</th>
-                                <th>Aksi</th>
+                                <th>Name</th>
+                                <th>Size</th>
+                                <th>Modified</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {{range .Files}}
                             <tr>
                                 <td>
-                                    <span class="file-icon">📄</span>
-                                    {{.Name}}
+                                    {{if .IsFolder}}
+                                        <span class="file-icon">📁</span>
+                                        <span class="file-name folder-name">{{.Name}}</span>
+                                    {{else}}
+                                        <span class="file-icon" id="icon-{{.RealName}}">📄</span>
+                                        <span class="file-name">{{.Name}}</span>
+                                    {{end}}
                                 </td>
-                                <td>{{.Size}}</td>
-                                <td>{{.ModTime}}</td>
                                 <td>
-                                    <a href="/download?file={{.Name}}" class="btn-small btn-download">Download</a>
-                                    <form method="POST" action="/delete" class="delete-form">
-                                        <input type="hidden" name="file" value="{{.Name}}">
-                                        <button type="submit" class="btn-small btn-delete" onclick="return confirm('Hapus file ini?')">Hapus</button>
-                                    </form>
+                                    {{if not .IsFolder}}
+                                        <span class="file-size">{{.Size}}</span>
+                                    {{else}}
+                                        <span class="file-size">-</span>
+                                    {{end}}
+                                </td>
+                                <td><span class="file-date">{{.ModTime}}</span></td>
+                                <td class="actions-cell">
+                                    {{if not .IsFolder}}
+                                        <!-- Added preview button for image/PDF files -->
+                                        <button class="btn-small btn-preview" onclick="previewFile('{{.Name}}', event)" title="Preview file">Preview</button>
+                                        <a href="/download?file={{.Name}}" class="btn-small btn-download" title="Download file">Download</a>
+                                        <button class="btn-small btn-share" onclick="shareFile('{{.Name}}', event)" title="Generate share link">Share</button>
+                                        <form method="POST" action="/delete" class="delete-form">
+                                            <input type="hidden" name="file" value="{{.Name}}">
+                                            <button type="submit" class="btn-small btn-delete" onclick="return confirm('Delete this file?')">Delete</button>
+                                        </form>
+                                    {{end}}
                                 </td>
                             </tr>
                             {{end}}
@@ -66,9 +163,199 @@
                     </table>
                 </div>
             {{else}}
-                <p class="empty-message">Tidak ada file. Upload file pertama Anda!</p>
+                <p class="empty-message">No files yet. Upload your first file!</p>
             {{end}}
         </div>
     </div>
+
+    <!-- Added preview modal for images and PDFs -->
+    <div id="preview-modal" class="modal">
+        <div class="modal-content preview-modal-content">
+            <span class="close">&times;</span>
+            <h3>File Preview</h3>
+            <div id="preview-container"></div>
+        </div>
+    </div>
+
+    <div id="share-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Share Link</h3>
+            <p>Share this link to allow others to download without login:</p>
+            <div class="share-link-container">
+                <input type="text" id="share-link-input" readonly class="share-link-input">
+                <button class="btn-small btn-copy" onclick="copyToClipboard()">Copy</button>
+            </div>
+            <p class="share-note">Link expires in 24 hours</p>
+        </div>
+    </div>
+
+    <script>
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const htmlElement = document.documentElement;
+        
+        const isDarkMode = localStorage.getItem('darkMode') === 'true';
+        if (isDarkMode) {
+            htmlElement.setAttribute('data-theme', 'dark');
+        }
+        
+        darkModeToggle.addEventListener('click', () => {
+            const currentTheme = htmlElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            htmlElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('darkMode', newTheme === 'dark');
+        });
+
+        const dragDropZone = document.getElementById('drag-drop-zone');
+        const fileInput = document.getElementById('file-input');
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dragDropZone.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dragDropZone.addEventListener(eventName, () => {
+                dragDropZone.classList.add('drag-over');
+            });
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            dragDropZone.addEventListener(eventName, () => {
+                dragDropZone.classList.remove('drag-over');
+            });
+        });
+        
+        dragDropZone.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            fileInput.files = files;
+            
+            const uploadForm = document.getElementById('upload-form');
+            if (uploadForm.checkValidity()) {
+                uploadForm.submit();
+            }
+        });
+
+        const previewModal = document.getElementById('preview-modal');
+        const previewClose = previewModal.querySelector('.close');
+        
+        previewClose.onclick = function() {
+            previewModal.style.display = 'none';
+        }
+        
+        async function previewFile(filename, event) {
+            event.preventDefault();
+            const ext = filename.toLowerCase().split('.').pop();
+            const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext);
+            const isPdf = ext === 'pdf';
+            
+            if (!isImage && !isPdf) {
+                alert('Preview not available for this file type');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/preview?file=' + encodeURIComponent(filename));
+                if (!response.ok) throw new Error('Failed to load');
+                
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                
+                const container = document.getElementById('preview-container');
+                container.innerHTML = '';
+                
+                if (isImage) {
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.style.maxWidth = '100%';
+                    img.style.maxHeight = '80vh';
+                    container.appendChild(img);
+                } else if (isPdf) {
+                    const iframe = document.createElement('iframe');
+                    iframe.src = url;
+                    iframe.style.width = '100%';
+                    iframe.style.height = '80vh';
+                    iframe.style.border = 'none';
+                    container.appendChild(iframe);
+                }
+                
+                previewModal.style.display = 'block';
+            } catch (error) {
+                alert('Error loading preview: ' + error.message);
+            }
+        }
+
+        const shareModal = document.getElementById('share-modal');
+        const closeBtn = shareModal.querySelector('.close');
+
+        closeBtn.onclick = function() {
+            shareModal.style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            if (event.target == shareModal) {
+                shareModal.style.display = 'none';
+            }
+            if (event.target == previewModal) {
+                previewModal.style.display = 'none';
+            }
+        }
+
+        async function shareFile(filename, event) {
+            event.preventDefault();
+            try {
+                const response = await fetch('/share', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'file=' + encodeURIComponent(filename)
+                });
+                const data = await response.json();
+                document.getElementById('share-link-input').value = data.shareLink;
+                shareModal.style.display = 'block';
+            } catch (error) {
+                alert('Error generating share link');
+            }
+        }
+        
+        function copyToClipboard() {
+            const input = document.getElementById('share-link-input');
+            input.select();
+            document.execCommand('copy');
+            alert('Link copied!');
+        }
+
+        async function updateStorageInfo() {
+            try {
+                const response = await fetch('/api/storage-info');
+                const data = await response.json();
+                
+                const status = document.getElementById('storage-status');
+                const text = document.getElementById('storage-text');
+                const barFill = document.getElementById('storage-bar-fill');
+                const quotaPercent = document.getElementById('quota-percent');
+                const quotaLabel = document.getElementById('quota-label');
+                
+                status.className = `status-dot ${data.status}`;
+                text.textContent = `${data.provider} - ${data.status}`;
+                
+                const percentage = Math.min(parseFloat(data.quotaPercent), 100);
+                barFill.style.width = percentage + '%';
+                quotaPercent.textContent = data.quotaPercent + '%';
+                quotaLabel.textContent = data.quotaPercent + '%';
+            } catch (error) {
+                console.error('Error updating storage info:', error);
+            }
+        }
+        
+        updateStorageInfo();
+        setInterval(updateStorageInfo, 30000);
+    </script>
 </body>
 </html>

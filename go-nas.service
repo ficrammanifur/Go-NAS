@@ -1,0 +1,18 @@
+[Unit]
+Description=Go-NAS Cloud Storage Server
+After=network-online.target rclone-gdrive.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ficrammanifur
+WorkingDirectory=/home/ficrammanifur/go-nas
+ExecStart=/usr/bin/go run main.go
+Restart=always
+RestartSec=10
+Environment="PATH=/usr/local/go/bin:/usr/bin:/bin"
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

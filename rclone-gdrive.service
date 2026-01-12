@@ -1,0 +1,26 @@
+# Systemd service for rclone mount (auto-mount Google Drive on boot)
+# Install: sudo cp rclone-gdrive.service /etc/systemd/system/
+# Enable: sudo systemctl enable rclone-gdrive
+# Start: sudo systemctl start rclone-gdrive
+
+[Unit]
+Description=Rclone Mount Google Drive
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ficrammanifur
+ExecStart=/usr/bin/rclone mount gdrive: /home/ficrammanifur/gdrive \
+  --vfs-cache-mode writes \
+  --allow-other \
+  --dir-cache-time 72h \
+  --poll-interval 15s \
+  --log-level INFO
+ExecStop=/bin/fusermount -u /home/ficrammanifur/gdrive
+Restart=always
+RestartSec=10
+Environment="PATH=/usr/local/bin:/usr/bin:/bin"
+
+[Install]
+WantedBy=multi-user.target
